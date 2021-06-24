@@ -54,6 +54,11 @@ langs = {
     },
 }
 
+sentence_regexes = {
+    "en": re.compile(r' *[\.\?!][\'"\)\]]*[ |\n](?=[A-Z])'),
+    "ru": re.compile(r' *[\.\?!][\'"»«\)\]]*[ |\n](?=[А-Я])')
+}
+
 
 def legacy_round(number, points=0):
     p = 10 ** points
@@ -90,6 +95,7 @@ class textstatistics:
 
     def set_lang(self, lang):
         self.__lang = lang
+        self.__sentence_regex = sentence_regexes.get(self.__get_lang_root()) or sentence_regexes["en"]
         self.pyphen = Pyphen(lang=self.__lang)
         self._cache_clear()
 
@@ -163,7 +169,7 @@ class textstatistics:
         Sentence count of a text
         """
         ignore_count = 0
-        sentences = re.split(r' *[\.\?!][\'"\)\]]*[ |\n](?=[A-Z])', text)
+        sentences = self.__sentence_regex.split(text)
         for sentence in sentences:
             if self.lexicon_count(sentence) <= 2:
                 ignore_count += 1
